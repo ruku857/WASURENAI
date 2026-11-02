@@ -78,21 +78,30 @@ checkForm.onsubmit = (event) => {
 renderChecklist();
   let swipeStartX = 0;
 
+
 function addSwipeDelete(row, index) {
-  row.addEventListener('touchstart', e => {
-    swipeStartX = e.touches[0].clientX;
-  }, { passive: true });
+  const del = document.createElement('button');
+  del.textContent = '🗑 削除';
+  del.style.background = '#dc3545';
+  del.style.color = 'white';
+  del.style.display = 'none';
+  del.onclick = () => {
+    checklist.splice(index, 1);
+    saveChecklist();
+    renderChecklist();
+  };
+  row.append(del);
 }
+  let startX = 0;
+  row.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+  }, { passive: true });
   row.addEventListener('touchend', e => {
-    const endX = e.changedTouches[0].clientX;
-    if (swipeStartX - endX > 20) {
-      if (confirm('この持ち物を削除する？')) {
-        checklist.splice(index, 1);
-        saveChecklist();
-        renderChecklist();
-      }
-    }
+    const distance = startX - e.changedTouches[0].clientX;
+    if (distance > 40) del.style.display = 'inline-block';
+    if (distance < -40) del.style.display = 'none';
   });
+
 
 const oldShowPage = showPage;
 showPage = function(name) {
