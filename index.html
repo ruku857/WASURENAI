@@ -91,7 +91,7 @@ function addSwipeDelete(row, index) {
     renderChecklist();
   };
   row.append(del);
-}
+
   let startX = 0;
   row.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX;
@@ -102,7 +102,7 @@ function addSwipeDelete(row, index) {
     if (distance < -40) del.style.display = 'none';
   });
 
-
+｝
 const oldShowPage = showPage;
 showPage = function(name) {
   oldShowPage(name);
