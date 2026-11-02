@@ -12,4 +12,80 @@ function showPage(name){document.querySelectorAll('.page').forEach(el=>el.classL
 function renderList(target,list){const root=document.getElementById(target);root.replaceChildren();if(!list.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='まだ登録がありません';root.append(empty);return}list.forEach(item=>{const row=document.createElement('div');row.className='item';const content=document.createElement('div');const name=document.createElement('strong');name.textContent=item.name;const note=document.createElement('small');note.textContent=item.note||'メモなし';content.append(name,note);const del=document.createElement('button');del.className='danger';del.textContent='削除';del.addEventListener('click',()=>{if(confirm('この登録を削除しますか？')){items=items.filter(x=>x.id!==item.id);save();render()}});row.append(content,del);root.append(row)})}
 function render(){document.getElementById('count').textContent=items.length+'件';renderList('homeList',items);const q=document.getElementById('searchInput').value.trim().toLowerCase();renderList('searchList',items.filter(x=>(x.name+' '+x.note).toLowerCase().includes(q)))}
 document.getElementById('searchInput').addEventListener('input',render);document.getElementById('entryForm').addEventListener('submit',e=>{e.preventDefault();const name=document.getElementById('itemName').value.trim(),note=document.getElementById('itemNote').value.trim();if(!name)return;items.unshift({id:Date.now()+'-'+Math.random(),name,note});if(save()){e.target.reset();showPage('home')}});render();
+
+
+const CHECK_KEY = 'wasurenai_checklist_v2';
+
+
+let checklist = JSON.parse(localStorage.getItem(CHECK_KEY) || '[]');
+  
+function saveChecklist() {
+  localStorage.setItem(CHECK_KEY, JSON.stringify(checklist));
+}
+  
+const checkPage = document.createElement('section');
+checkPage.id = 'checklist';
+checkPage.className = 'page hidden';
+checkPage.innerHTML = '<div class="panel"><h2>🎒 持ち物チェックリスト</h2><div id="checkList"></div></div>';
+document.querySelector('main').append(checkPage);
+  
+const checkButton = document.createElement('button');
+checkButton.dataset.page = 'checklist';
+checkButton.textContent = '☑ 持ち物';
+checkButton.onclick = () => showPage('checklist');
+document.querySelector('.tabs').append(checkButton);
+  
+function renderChecklist() {
+  const root = document.getElementById('checkList');
+  root.replaceChildren();
+  checklist.forEach((item, index) => {
+    const label = document.createElement('label');
+    label.style.display = 'block';
+    label.style.padding = '12px';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = item.done;
+    checkbox.onchange = () => {
+      item.done = checkbox.checked;
+      saveChecklist();
+      renderChecklist();
+    };
+    label.append(checkbox, document.createTextNode(' ' + item.name));
+    root.append(label);
+  });
+}
+  
+const checkForm = document.createElement('form');
+checkForm.innerHTML = `
+  <input id="checkInput" placeholder="持ち物を入力" required>
+  <button type="submit">追加する</button>
+`;
+checkPage.querySelector('.panel').prepend(checkForm);
+
+checkForm.onsubmit = (event) => {
+  event.preventDefault();
+  const input = document.getElementById('checkInput');
+  const name = input.value.trim();
+  if (!name) return;
+  checklist.push({ name, done: false });
+  saveChecklist();
+  renderChecklist();
+  input.value = '';
+};
+renderChecklist();
+  
+const oldShowPage = showPage;
+showPage = function(name) {
+  oldShowPage(name);
+  if (name === 'checklist') {
+    renderChecklist();
+  }
+};
+
+
+
+
+
+
+  
 </script></body></html>
