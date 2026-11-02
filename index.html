@@ -52,6 +52,9 @@ function renderChecklist() {
     };
     label.append(checkbox, document.createTextNode(' ' + item.name));
     root.append(label);
+    
+    addSwipeDelete(label, index);
+
   });
 }
   
@@ -73,7 +76,24 @@ checkForm.onsubmit = (event) => {
   input.value = '';
 };
 renderChecklist();
-  
+  let swipeStartX = 0;
+
+function addSwipeDelete(row, index) {
+  row.addEventListener('touchstart', e => {
+    swipeStartX = e.touches[0].clientX;
+  }, { passive: true });
+}
+  row.addEventListener('touchend', e => {
+    const endX = e.changedTouches[0].clientX;
+    if (swipeStartX - endX > 60) {
+      if (confirm('この持ち物を削除する？')) {
+        checklist.splice(index, 1);
+        saveChecklist();
+        renderChecklist();
+      }
+    }
+  });
+
 const oldShowPage = showPage;
 showPage = function(name) {
   oldShowPage(name);
